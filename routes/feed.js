@@ -7,4 +7,7 @@ const router = express.Router(); //creates a lightweight, modular route handler.
 // GET /feed/posts
 router.get("/posts", feedController.getPost);
 
+// POST /feed/posts
+router.post("/post", feedController.createPost);
+
 module.exports = router;
