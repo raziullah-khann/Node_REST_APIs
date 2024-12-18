@@ -1,0 +1,27 @@
+{
+  "name": "node_rest_apis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raziullah-khann/Node_REST_APIs.git"
+  },
+  "author": "Raziullah Khan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raziullah-khann/Node_REST_APIs/issues"
+  },
+  "homepage": "https://github.com/raziullah-khann/Node_REST_APIs#readme",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
