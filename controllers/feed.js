@@ -7,6 +7,7 @@ exports.getPost = (req,res, next) => {
 exports.createPost = (req, res, next) => {
     //suppose we get title and content from the body
     const {title, content} = req.body;
+    console.log(title, content);
     //create post in db
     res.status(201).json({
         message: "Post created successfully!",
