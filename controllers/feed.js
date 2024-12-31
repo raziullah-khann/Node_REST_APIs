@@ -1,4 +1,5 @@
 const path = require("path");
+const {validationResult} = require('express-validator');
 
 exports.getPost = (req, res, next) => {
   res.status(200).json({
@@ -18,6 +19,10 @@ exports.getPost = (req, res, next) => {
 };
 
 exports.createPost = (req, res, next) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422).json({message: 'Validation failed, entered data is incorrect', errors: errors.array()})
+    }
   //suppose we get title and content from the body
   const { title, content } = req.body;
   console.log(title, content);
