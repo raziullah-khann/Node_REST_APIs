@@ -9,6 +9,6 @@ const router = express.Router(); //creates a lightweight, modular route handler.
 router.get("/posts", feedController.getPost);
 
 // POST /feed/posts
-router.post("/post", [body('title').trim().isLength({min:5}), body('content').trim().isLength({min:5})], feedController.createPost);
+router.post("/post", [body('title').trim().isLength({min:7}), body('content').trim().isLength({min:5})], feedController.createPost);
 
 module.exports = router;
