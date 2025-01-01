@@ -1,14 +1,21 @@
+require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const feedRoute = require("./routes/feed");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
+
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const app = express();
 
 // app.use(bodyParser.urlencoded({extended: false})); //x-www-form-urlencoded <form>
 // Middleware to parse JSON bodies
 app.use(bodyParser.json()); //application/json
+
+//serve static file 
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -22,14 +29,19 @@ app.use((req, res, next) => {
 
 app.use("/feed", feedRoute);
 
+app.use((error, req, res, next) =>{
+  console.log(err);
+  const status = error.statusCode || 500;
+  const message = error.message;
+  res.status(status).json({message: message});
+})
+
 mongoose
-  .connect(
-    "mongodb+srv://Raziullah-Khan:AXLIVFo3hpQp1jRF@cluster0.frgxn.mongodb.net/messages?retryWrites=true&w=majority&appName=Cluster0"
-  )
-  .then(result => {
-      app.listen(8080, () => {
-        console.log("Server is running on http://localhost:8080");
-      });
+  .connect(MONGODB_URI)
+  .then((result) => {
+    app.listen(8080, () => {
+      console.log("Server is running on http://localhost:8080");
+    });
   })
   .catch((err) => {
     console.log(err);
