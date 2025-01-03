@@ -2,6 +2,7 @@ require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
+const multer = require("multer");
 
 const feedRoute = require("./routes/feed");
 const mongoose = require("mongoose");
@@ -10,10 +11,29 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 const app = express();
 
+//here we configure multer
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb)=>{
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
+  }
+}); 
+
+const fileFilter = (req, file, cb) => {
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png'){
+    cb(null, true);
+  }else{
+    cb(null, false);
+  }
+}
 // app.use(bodyParser.urlencoded({extended: false})); //x-www-form-urlencoded <form>
 // Middleware to parse JSON bodies
 app.use(bodyParser.json()); //application/json
 
+//here we register multer
+app.use(multer({ fileFilter: fileFilter, storage: fileStorage}).single('image'));
 //serve static file 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
