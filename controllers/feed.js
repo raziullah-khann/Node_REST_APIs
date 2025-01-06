@@ -2,7 +2,6 @@ const path = require("path");
 const fs = require("fs");
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
-const { count } = require("console");
 
 exports.getPost = (req, res, next) => {
   const currentPage = req.query.page || 1;
