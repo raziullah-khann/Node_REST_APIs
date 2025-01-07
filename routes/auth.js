@@ -26,4 +26,6 @@ router.put("/signup", [
     .withMessage("Please enter name minimum 3 caracter!"),
 ], authController.signup);
 
+router.post('/login');
+
 module.exports = router;
