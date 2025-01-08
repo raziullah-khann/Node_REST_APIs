@@ -10,15 +10,15 @@ const router = express.Router(); //creates a lightweight, modular route handler.
 router.get("/posts", isAuth, feedController.getPost);
 
 // POST /feed/posts
-router.post("/post", [body('title').trim().isLength({min:5}), body('content').trim().isLength({min:5})], feedController.createPost);
+router.post("/post", isAuth, [body('title').trim().isLength({min:5}), body('content').trim().isLength({min:5})], feedController.createPost);
 
 //fetching single post from db
-router.get("/post/:postId", feedController.getSinglePost);
+router.get("/post/:postId", isAuth, feedController.getSinglePost);
 
 //updating post
-router.put("/post/:postId", [body('title').trim().isLength({min:5}), body('content').trim().isLength({min:5})], feedController.updatePost);
+router.put("/post/:postId", isAuth, [body('title').trim().isLength({min:5}), body('content').trim().isLength({min:5})], feedController.updatePost);
 
 //deleting post
-router.delete("/post/:postId", feedController.deletePost);
+router.delete("/post/:postId", isAuth, feedController.deletePost);
 
 module.exports = router;

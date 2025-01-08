@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
+const User = require("../models/user");
 
 exports.getPost = (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -11,12 +12,18 @@ exports.getPost = (req, res, next) => {
     .countDocuments()
     .then((count) => {
       totalItems = count;
-      return Post.find().skip((currentPage-1) * perPage).limit(perPage);
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
     })
     .then((posts) => {
       res
         .status(200)
-        .json({ message: "Fetching post successfully", posts: posts, totalItems: totalItems });
+        .json({
+          message: "Fetching post successfully",
+          posts: posts,
+          totalItems: totalItems,
+        });
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -46,21 +53,31 @@ exports.createPost = (req, res, next) => {
   //suppose we get title and content from the body
   const { title, content } = req.body;
   console.log(title, content);
+  let creator;
   //create post in db
   const post = new Post({
     title: title,
     imageUrl: "images/" + imageUrl,
     // imageUrl: imageUrl,
     content: content,
-    creator: { name: "Raziullah" },
+    creator: req.userId,
   });
   post
     .save()
     .then((post) => {
       console.log("Backend post object:", post);
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then((result) => {
       res.status(201).json({
         message: "Post created successfully!",
         post: post,
+        creator: { _id: creator._id, name: creator.name }
       });
     })
     .catch((err) => {
