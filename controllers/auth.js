@@ -1,7 +1,10 @@
+require("dotenv").config();
 const User = require("../models/user");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
+const SECRET_KEY = process.env.SECRET_KEY;
 
 exports.signup = (req, res, next) => {
   const errors = validationResult(req);
@@ -40,7 +43,7 @@ exports.signup = (req, res, next) => {
 
 exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  let loadedUser;
+  let loadedUser; //store user in outside of findOne to manage scoping and ensure access to user data across promise chains.  
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
@@ -59,7 +62,7 @@ exports.login = (req, res, next) => {
       }
       const token = jwt.sign(
         { email: loadedUser.email, userId: loadedUser._id.toString() },
-        "secretkeyraziullahkhan",
+        SECRET_KEY,
         { expiresIn: "1h" }
       );
       res
