@@ -140,6 +140,13 @@ exports.updatePost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      //here we check loggedin user are creted this product then he deleting the post
+      if(post.creator.toString() !== req.userId){
+        const error = new Error('Not authorized!');
+        error.statusCode = 403;
+        throw error;
+      }
+      //check if we update image new image not eqal to old one then old one deleted from file and replace from databse
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
@@ -169,6 +176,11 @@ exports.deletePost = (req, res, next) => {
       if (!post) {
         const error = new Error("Could not find post.");
         error.statusCode = 404;
+        throw error;
+      }
+      if(post.creator.toString() !== req.userId){
+        const error = new Error('Not authorized!');
+        error.statusCode = 403;
         throw error;
       }
       clearImage(post.imageUrl); //here we clear image after deleting
