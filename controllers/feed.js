@@ -140,6 +140,13 @@ exports.updatePost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+
+      //here we check user user login and creator are same or not
+      if(post.creator.toString() !== req.userId){
+        const error = new Error("Not Authorised.");
+        error.statusCode = 403;
+        throw error;
+      }
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
@@ -171,10 +178,23 @@ exports.deletePost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      //here we check user user login and creator are same or not
+      if(post.creator.toString() !== req.userId){
+        const error = new Error("Not Authorised.");
+        error.statusCode = 403;
+        throw error;
+      }
       clearImage(post.imageUrl); //here we clear image after deleting
       return Post.findByIdAndDelete(postId); //here we delete our post
     })
     .then((result) => {
+      return User.findById(req.userId);
+    })
+    .then(user => {
+      user.posts.pull(postId);
+      return user.save();
+    })
+    .then(result => {
       console.log(result);
       res.status(200).json({ message: "Delete post Succesfully!" });
     })
