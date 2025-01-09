@@ -4,33 +4,26 @@ const { validationResult } = require("express-validator");
 const Post = require("../models/post");
 const User = require("../models/user");
 
-exports.getPost = (req, res, next) => {
+exports.getPost = async (req, res, next) => {
   const currentPage = req.query.page || 1;
   const perPage = 2;
-  let totalItems;
-  Post.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
-      return Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((posts) => {
-      res
-        .status(200)
-        .json({
-          message: "Fetching post successfully",
-          posts: posts,
-          totalItems: totalItems,
-        });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+  // let totalItems;
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    res.status(200).json({
+      message: "Fetching post successfully",
+      posts: posts,
+      totalItems: totalItems,
     });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 exports.createPost = (req, res, next) => {
@@ -77,7 +70,7 @@ exports.createPost = (req, res, next) => {
       res.status(201).json({
         message: "Post created successfully!",
         post: post,
-        creator: { _id: creator._id, name: creator.name }
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => {
@@ -142,7 +135,7 @@ exports.updatePost = (req, res, next) => {
       }
 
       //here we check user user login and creator are same or not
-      if(post.creator.toString() !== req.userId){
+      if (post.creator.toString() !== req.userId) {
         const error = new Error("Not Authorised.");
         error.statusCode = 403;
         throw error;
@@ -179,7 +172,7 @@ exports.deletePost = (req, res, next) => {
         throw error;
       }
       //here we check user user login and creator are same or not
-      if(post.creator.toString() !== req.userId){
+      if (post.creator.toString() !== req.userId) {
         const error = new Error("Not Authorised.");
         error.statusCode = 403;
         throw error;
@@ -190,11 +183,11 @@ exports.deletePost = (req, res, next) => {
     .then((result) => {
       return User.findById(req.userId);
     })
-    .then(user => {
+    .then((user) => {
       user.posts.pull(postId);
       return user.save();
     })
-    .then(result => {
+    .then((result) => {
       console.log(result);
       res.status(200).json({ message: "Delete post Succesfully!" });
     })
