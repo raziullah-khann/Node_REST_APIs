@@ -62,8 +62,12 @@ app.use((error, req, res, next) =>{
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {
-    app.listen(8080, () => {
+    const server = app.listen(8080, () => {
       console.log("Server is running on http://localhost:8080");
+    });
+    const io = require('socket.io')(server);
+    io.on('connection', (socket) => {
+      console.log('Cliet connected!')
     });
   })
   .catch((err) => {
