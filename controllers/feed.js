@@ -11,7 +11,7 @@ exports.getPost = async (req, res, next) => {
   // let totalItems;
   try {
     const totalItems = await Post.find().countDocuments();
-    const posts = await Post.find().populate('creator')
+    const posts = await Post.find().populate('creator').sort({createdAt: -1})
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
       console.log("sabhi post populate hone ke baad mil rha h",posts);
@@ -122,7 +122,7 @@ exports.updatePost = async (req, res, next) => {
   //here we know our data is correct to pass validation and image new or prior
   //now we store in database
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate('creator');
     if (!post) {
       const error = new Error("Could not find post.");
       error.statusCode = 404;
@@ -130,7 +130,7 @@ exports.updatePost = async (req, res, next) => {
     }
 
     //here we check user user login and creator are same or not
-    if (post.creator.toString() !== req.userId) {
+    if (post.creator._id.toString() !== req.userId) {
       const error = new Error("Not Authorised.");
       error.statusCode = 403;
       throw error;
@@ -142,7 +142,8 @@ exports.updatePost = async (req, res, next) => {
     post.content = content;
     post.imageUrl = imageUrl;
     const result = await post.save();
-    console.log(result);
+    console.log("update karne ke baad post hai",result);
+    io.getIO().emit('posts', { action: 'update', post: result})
     res
       .status(200)
       .json({ message: "Post Updated Successfully", post: result });
