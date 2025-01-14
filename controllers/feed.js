@@ -180,6 +180,7 @@ exports.deletePost = async (req, res, next) => {
     const result = await user.save();
 
     console.log(result);
+    io.getIO().emit('posts', { action: 'delete', post: postId });
     res
       .status(200)
       .json({ message: "Delete post Succesfully!", result: result });
