@@ -16,6 +16,8 @@ module.exports = {
     }
     if(errors.length>0){
         const error = new Error('Invalid input!');
+        error.code = 422;
+        error.data = errors;
         throw error;
     }
     return User.findOne({email: email}).then(user=>{
