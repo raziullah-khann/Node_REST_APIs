@@ -75,12 +75,21 @@ module.exports = {
     return { token: token, userId: user._id.toString() };
   },
   createPost: async function ({ postInput }, req) {
+    //check user user is authenticated or not
+    if (!req.isAuth) {
+      const error = new Error("User is Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
     const { title, content, imageUrl } = postInput;
     const errors = [];
     if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
       errors.push({ message: "Title must have atleast 5 charater!" });
     }
-    if (validator.isEmpty(content) || !validator.isLength(content, { min: 5 })) {
+    if (
+      validator.isEmpty(content) ||
+      !validator.isLength(content, { min: 5 })
+    ) {
       errors.push({ message: "Content must have atleast 5 charater!" });
     }
     if (errors.length > 0) {
@@ -89,13 +98,24 @@ module.exports = {
       error.data = errors;
       throw error;
     }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      //if user not have in db
+      const error = new Error("User is not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+
     const post = new Post({
       title: title,
       content: content,
       imageUrl: imageUrl,
+      creator: user,
     });
     const createdPost = await post.save();
     //Add post to User's posts
+    user.posts.push(createdPost);
     return {
       ...createdPost._doc,
       _id: createdPost._id.toString(),

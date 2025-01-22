@@ -7,6 +7,7 @@ const { graphqlHTTP } = require('express-graphql');
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolvers = require('./graphql/resolvers');
+const graphqlAuth = require('./middleware/graphql-auth');
 
 const mongoose = require("mongoose");
 
@@ -53,6 +54,8 @@ app.use((req, res, next) => {
    
   next();
 });
+
+app.use(graphqlAuth);
 
 // GraphQL endpoint
 app.use('/graphql', graphqlHTTP({
