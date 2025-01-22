@@ -1,8 +1,9 @@
-require('dotenv').config();
+require("dotenv").config();
 const User = require("../models/user");
+const Post = require("../models/post");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -46,27 +47,60 @@ module.exports = {
       })
       .then((user) => {
         console.log(user);
-        return { ...user._doc, id: user._id.toString() };
+        return { ...user._doc, _id: user._id.toString() };
       });
   },
-  login: async function ({email, password}) {
-    const user = await User.findOne({email: email});
-    if(!user){
-        //if user not have in db
-        const error = new Error("User is not exist!");
-        error.code = 401;
-        throw error;
+  login: async function ({ email, password }) {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      //if user not have in db
+      const error = new Error("User is not exist!");
+      error.code = 401;
+      throw error;
     }
     //check password is correct or not!
     const isEqual = await bcrypt.compare(password, user.password);
-    if(!isEqual){
-        //if user enter wrong password
-        const error = new Error("Wrong password!");
-        error.code = 401;
-        throw error;
+    if (!isEqual) {
+      //if user enter wrong password
+      const error = new Error("Wrong password!");
+      error.code = 401;
+      throw error;
     }
     //create jwt token
-    const token = jwt.sign({email: email, userId: user._id.toString()},SECRET_KEY, { expiresIn: '1h'});
-    return {token: token, userId: user._id.toString()};
-  }
+    const token = jwt.sign(
+      { email: email, userId: user._id.toString() },
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+    return { token: token, userId: user._id.toString() };
+  },
+  createPost: async function ({ postInput }, req) {
+    const { title, content, imageUrl } = postInput;
+    const errors = [];
+    if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
+      errors.push({ message: "Title must have atleast 5 charater!" });
+    }
+    if (validator.isEmpty(content) || !validator.isLength(content, { min: 5 })) {
+      errors.push({ message: "Content must have atleast 5 charater!" });
+    }
+    if (errors.length > 0) {
+      const error = new Error("Invalid input!");
+      error.code = 422;
+      error.data = errors;
+      throw error;
+    }
+    const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+    });
+    const createdPost = await post.save();
+    //Add post to User's posts
+    return {
+      ...createdPost._doc,
+      _id: createdPost._id.toString(),
+      createdAt: createdPost.createdAt.toISOString(),
+      updatedAt: createdPost.createdAt.toISOString(),
+    };
+  },
 };
