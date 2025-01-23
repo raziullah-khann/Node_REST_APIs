@@ -48,8 +48,9 @@ app.use((req, res, next) => {
     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   if (req.method === 'OPTIONS') {
-    return res.status(200).end(); // Early return ensures no further middleware is called
+    return res.status(200).end();  // For preflight requests, respond with 200 and end
   }
    
   next();

@@ -124,18 +124,29 @@ module.exports = {
       updatedAt: createdPost.createdAt.toISOString(),
     };
   },
-  getPost: async function(args, req){
+  getPost: async function ({page}, req) {
     //check user user is authenticated or not
     if (!req.isAuth) {
-        const error = new Error("User is Not Authenticated!");
-        error.code = 401;
-        throw error;
-      }
-      const totalPosts = await Post.find().countDocuments;
-      const posts = await Post.find().sort({createdAt: -1}).populate('creator');
-      return { posts: posts.map(p =>{
-        return { ...p._doc, _id: p._id.toString(), createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString(), }
-      }), totalPosts: totalPosts};
-
-  }
+      const error = new Error("User is Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    if(!page){
+        page = 1;
+    }
+    const perPage = 2;
+    const totalPosts = await Post.find().countDocuments();
+    const posts = await Post.find().sort({ createdAt: -1 }).skip((page - 1) * perPage).limit(perPage).populate("creator");
+    return {
+      posts: posts.map((p) => {
+        return {
+          ...p._doc,
+          _id: p._id.toString(),
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+        };
+      }),
+      totalPost: totalPosts,
+    };
+  },
 };
