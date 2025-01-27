@@ -21,9 +21,9 @@ const fileStorage = multer.diskStorage({
     cb(null, "images");
   },
   filename: (req, file, cb) => {
+    const cleanFileName = new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname;
     cb(
-      null,
-      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
+      null, cleanFileName.replace(/\\/g, "/") // Ensure forward slashes
     );
   },
 });
@@ -80,7 +80,7 @@ app.put("/post-image", (req, res, next) => {
     clearImage(req.file.oldPath);
   }
 
-  return res.status(201).json({message: 'File stored.', filePath: req.file.path}); //this is the [ath wehere multer store image]
+  return res.status(201).json({message: 'File stored.', filePath: req.file.path.replace(/\\/g, "/")}); //this is the [path where multer store image]
 });
 
 // GraphQL endpoint
