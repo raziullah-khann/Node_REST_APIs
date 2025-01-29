@@ -4,7 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const { graphqlHTTP } = require("express-graphql");
-const fs = require('fs');
+const { clearImage } = require('./util/file');
 
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolvers = require("./graphql/resolvers");
@@ -77,8 +77,8 @@ app.put('/post-image', (req, res, next) => {
   // Manually parse 'oldPath' from the request body
   const oldPath = req.body.oldPath && req.body.oldPath.trim() !== "" ? req.body.oldPath : null;
 
-  console.log('Request body:', req.body); // Log the entire request body
-  console.log('Old path:', req.body.oldPath); // Log the old path specifically
+  // console.log('Request body:', req.body); // Log the entire request body
+  // console.log('Old path:', req.body.oldPath); // Log the old path specifically
 
   // If no file is uploaded, just return success without modifying image
   if (!req.file) {
@@ -139,23 +139,3 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-  const clearImage = (filePath) => {
-    if (!filePath) {
-      console.log('No filePath provided for deletion');
-      return;
-    }
-  
-    const fullPath = path.join(__dirname, filePath).replace(/\\/g, "/");
-  
-    console.log("Deleting image:", fullPath);
-  
-    fs.unlink(fullPath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
-      } else {
-        console.log("File successfully deleted:", fullPath);
-      }
-    });
-  };
-  
