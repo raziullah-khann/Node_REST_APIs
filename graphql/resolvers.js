@@ -4,7 +4,7 @@ const Post = require("../models/post");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
-const { clearImage } = require('../util/file');
+const { clearImage } = require("../util/file");
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -240,9 +240,9 @@ module.exports = {
     }
     //check created post user not equal to to current user then throw error
     if (post.creator.toString() !== req.userId.toString()) {
-        const error = new Error("Not Authorized!");
-        error.code = 403;
-        throw error;
+      const error = new Error("Not Authorized!");
+      error.code = 403;
+      throw error;
     }
     clearImage(post.imageUrl);
     await Post.findByIdAndDelete(id);
@@ -251,5 +251,37 @@ module.exports = {
     user.posts.pull(id);
     await user.save();
     return true;
+  },
+  status: async function (args, req) {
+    //check user login or not
+    if (!req.isAuth) {
+      const error = new Error("User is Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("No user found!");
+      error.code = 404;
+      throw error;
+    }
+    return { ...user._doc, _id: user._id.toString() };
+  },
+  updateStatus: async function ({status}, req) {
+    //check user login or not
+    if (!req.isAuth) {
+      const error = new Error("User is Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("No user found!");
+      error.code = 404;
+      throw error;
+    }
+    user.status = status;
+    await user.save();
+    return { ...user._doc, _id: user._id.toString() };
   },
 };
