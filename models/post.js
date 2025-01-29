@@ -7,9 +7,15 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
+    // imageUrl: {
+    //   type: String,
+    //   required: true,
+    // },
     imageUrl: {
       type: String,
-      required: true,
+      required: function () {
+        return this.isNew; // Only required when creating a new post
+      },
     },
     content: {
       type: String,
@@ -17,8 +23,8 @@ const postSchema = new Schema(
     },
     creator: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true }
