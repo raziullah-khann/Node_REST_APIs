@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const { graphqlHTTP } = require("express-graphql");
+const fs = require('fs');
 
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolvers = require("./graphql/resolvers");
@@ -68,19 +69,33 @@ app.use((req, res, next) => {
 //authorization middleware
 app.use(graphqlAuth);
 
-app.put("/post-image", (req, res, next) => {
-  if(!req.isAuth){
-    throw new Error('User Not Authenticated!');
-  }
-  if(!req.file) {
-    return res.status(200).json({ message: "No file provided!" });
+app.put('/post-image', (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error('Not authenticated!');
   }
 
-  if(req.file.oldPath){
-    clearImage(req.file.oldPath);
+  // Manually parse 'oldPath' from the request body
+  const oldPath = req.body.oldPath && req.body.oldPath.trim() !== "" ? req.body.oldPath : null;
+
+  console.log('Request body:', req.body); // Log the entire request body
+  console.log('Old path:', req.body.oldPath); // Log the old path specifically
+
+  // If no file is uploaded, just return success without modifying image
+  if (!req.file) {
+    console.log("No new file provided, skipping image update.");
+    return res.status(200).json({ message: "No new image uploaded." });
   }
 
-  return res.status(201).json({message: 'File stored.', filePath: req.file.path.replace(/\\/g, "/")}); //this is the [path where multer store image]
+  // If there's an old image, delete it before saving the new one
+  if (oldPath && oldPath !== "undefined") {
+    clearImage(oldPath);
+  }else {
+    console.log("No valid oldPath provided");
+  }
+
+  return res
+    .status(201)
+    .json({ message: 'File stored.', filePath: req.file.path.replace(/\\/g, "/") });
 });
 
 // GraphQL endpoint
@@ -125,9 +140,22 @@ mongoose
     console.log(err);
   });
 
-const clearImage = (filePath) => {
-  filePath = path.join(__dirname, "..", filePath);
-  fs.unlink(filePath, (err) => {
-    console.log(err);
-  });
-};
+  const clearImage = (filePath) => {
+    if (!filePath) {
+      console.log('No filePath provided for deletion');
+      return;
+    }
+  
+    const fullPath = path.join(__dirname, filePath).replace(/\\/g, "/");
+  
+    console.log("Deleting image:", fullPath);
+  
+    fs.unlink(fullPath, (err) => {
+      if (err) {
+        console.error("Error deleting file:", err);
+      } else {
+        console.log("File successfully deleted:", fullPath);
+      }
+    });
+  };
+  
