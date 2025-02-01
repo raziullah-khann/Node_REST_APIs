@@ -13,9 +13,7 @@ const postSchema = new Schema(
     // },
     imageUrl: {
       type: String,
-      required: function () {
-        return this.isNew; // Only required when creating a new post
-      },
+      required: true
     },
     content: {
       type: String,

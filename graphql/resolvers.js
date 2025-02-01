@@ -240,7 +240,7 @@ module.exports = {
     }
     //check created post user not equal to to current user then throw error
     if (post.creator.toString() !== req.userId.toString()) {
-      const error = new Error("Not Authorized!");
+      const error = new Error("User can't delete other user post!");
       error.code = 403;
       throw error;
     }

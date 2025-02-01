@@ -78,7 +78,7 @@ app.put('/post-image', (req, res, next) => {
   const oldPath = req.body.oldPath && req.body.oldPath.trim() !== "" ? req.body.oldPath : null;
 
   // console.log('Request body:', req.body); // Log the entire request body
-  // console.log('Old path:', req.body.oldPath); // Log the old path specifically
+  // console.log('Old path:', req.body.oldPath);   // Log the old path specifically
 
   // If no file is uploaded, just return success without modifying image
   if (!req.file) {
