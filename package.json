@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@types/mongoose": "^5.11.97",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "sinon": "^19.0.2"
   }
 }
